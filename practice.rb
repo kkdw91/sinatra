@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'httparty'
 require 'nokogiri'
-
+require 'csv'
 
 get '/' do
     send_file 'index.html'
@@ -54,5 +54,28 @@ get '/search' do
    text = Nokogiri::HTML(response.body)
    @win = text.css('#SummonerLayoutContent > div.tabItem.Content.SummonerLayoutContent.summonerLayout-summary > div.SideContent > div.TierBox.Box > div.SummonerRatingMedium > div.TierRankInfo > div.TierInfo > span.WinLose > span.wins')
    @lose =text.css('#SummonerLayoutContent > div.tabItem.Content.SummonerLayoutContent.summonerLayout-summary > div.SideContent > div.TierBox.Box > div.SummonerRatingMedium > div.TierRankInfo > div.TierInfo > span.WinLose > span.losses')
+    
+    # 검색한 기록을 txt 파일이나 csv 파일로 저장
+   
+    # File.open("log.txt", "a+") do |f|
+    # f.write("#{@id}, #{@win.text}, #{@lose.text}, " + Time.now.to_s+"\n")
+    # end
+  
+    CSV.open('log.csv' ,'a+') do |csv|    
+        csv<<[@id, @win.text, @lose.text,Time.now.to_s]
+    end
+   
    erb :search
 end
+
+# 
+get '/log' do
+    @log = []
+    CSV.foreach("log.csv") do |row|
+        @log << row # row 자체가 배열, 그게 log라는 배열에 들어가므로 배열안에 배열로 저장되는 구조
+        #row.each do |i|
+    end
+    erb :log
+end   
+ 
+ 
